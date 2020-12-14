@@ -1,0 +1,6 @@
+.idea
+venv
+streaming-app/target
+streaming-app/.bsp
+streaming-app/project/project
+streaming-app/project/target
