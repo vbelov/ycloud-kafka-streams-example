@@ -22,8 +22,7 @@ def main():
     })
 
     print('Downloading sample dataset ...')
-    # Autobiography of Benjamin Franklin
-    response = requests.get('http://www.gutenberg.org/cache/epub/20203/pg20203.txt')
+    response = requests.get('https://storage.yandexcloud.net/yc-mdb-examples/kafka/streams/wordcount/Autobiography_of_Benjamin_Franklin.txt')
     print('Done')
     text = response.text
     words = text.split()
