@@ -4,14 +4,15 @@
 - python приложение `producer` считывает текст (для примера использована биография Бенжамина Франклина), 
 разбивает его на отдельные слова и публикует их в топик `streams-plaintext-input`.
 - `streaming-app` это приложение на Scala, использующие библиотеку Kafka Streams. Оно вычитывает отдельные слова из топика 
-`streams-plaintext-input`, агреггирует их, подсчитывает количество использований каждого слова и публикует результат 
+`streams-plaintext-input`, агрегирует их, подсчитывает количество использований каждого слова и публикует результат 
 в топик `streams-wordcount-output`.
-- python приложение `consumer` вычитывает агреггированные данные из топика `streams-wordcount-output` и печатает их.
+- python приложение `consumer` вычитывает агрегированные данные из топика `streams-wordcount-output` и печатает их.
 
 Идея и базовая реализация `streaming-app` взята [отсюда](https://github.com/confluentinc/kafka-streams-examples/blob/6.0.0-post/src/main/scala/io/confluent/examples/streams/WordCountScalaExample.scala), 
 но доработана с целью аутентификации.
 
-На момент написания этого туториала создание топиков через admin api в Yandex Managed Service for Apache Kafka® запрещено. 
+На момент написания этого туториала создание топиков через admin api Kafka брокеров в Yandex Managed Service 
+for Apache Kafka® запрещено. 
 Топики можно создавать только через API Яндекс.Облака. Также невозможен доступ к топикам без аутентификации. 
 Поэтому для корректной работы Kafka Streams необходимо самостоятельно через интерфейсы Яндекс.Облака создавать топики, 
 пользователей и настраивать им права доступа.
@@ -35,11 +36,11 @@ yc kafka cluster create kafka-streams \
     --version 2.6 \
     --assign-public-ip
 ```
-На момент написания этого туториала еще не опубликована версия yc cli, которая позволяет уменьшить размер сегмента лога. 
+На момент написания этого туториала еще не опубликована версия `yc`, которая позволяет уменьшить размер сегмента лога. 
 Поэтому возможно потребуется увеличить размер диска, к примеру, до 200 ГБ.
-В новой версии yc при создании кластера kafka можно будет указать дополнительный параметр `--log-segment-bytes=16777216`.
+В новой версии `yc` при создании кластера Kafka можно будет указать дополнительный параметр `--log-segment-bytes=16777216`.
 
-Запрашиваем список хостов созданного kafka кластера:
+Запрашиваем список хостов созданного кластера Kafka:
 ```bash
 yc kafka cluster list-hosts kafka-streams
 ```
@@ -53,7 +54,8 @@ yc kafka topic create wordcount-scala-application-KSTREAM-AGGREGATE-STATE-STORE-
 yc kafka topic create wordcount-scala-application-KSTREAM-AGGREGATE-STATE-STORE-0000000004-changelog --partitions=12 --cluster-name=kafka-streams
 ```
 Возможно для вашего приложения понадобятся и другие служебные топики. 
-Названия необходимых топиков можно будет увидеть в логе streaming приложения: там будут ошибки про невозможность создания топика или невозможность получить к нему доступ.
+Названия необходимых топиков можно будет увидеть в логе приложения, использующего Kafka Streams: там будут отображаться 
+ошибки про невозможность создания топика или невозможность получить к нему доступ.
 
 Создаем пользователей и выдаем им необходимые права:
 ```bash
@@ -164,4 +166,29 @@ KAFKA_BROKERS=$BROKER_FQDN:9091 \
     KAFKA_USER=output-consumer \
     KAFKA_PASS=consumer-password \
     ./venv/bin/python consumer.py
+```
+
+Через некоторе время в stdout станут появляться сообщения вида:
+```
+Current list of top 20 most frequent words:
+the: 619
+of: 458
+and: 360
+in: 290
+to: 290
+a: 204
+his: 164
+was: 155
+i: 145
+he: 131
+franklin: 110
+: 104
+as: 104
+that: 93
+it: 91
+my: 90
+by: 78
+s: 78
+is: 71
+with: 67
 ```
